@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import * as THREE from 'three';
-import SceneInit from "@/pages/lib/SceneInit";
+import SceneInit from "@/pages/scene/SceneInit";
 
 export default function Home() {
     useEffect(() => {
@@ -18,7 +18,6 @@ export default function Home() {
     // Возвращаем JSX для отображения на странице
     return (
         <div className="flex flex-col items-center justify-center">
-            <canvas id="myThreeJsCanvas" />
         </div>
     );
 }
