@@ -89,9 +89,9 @@ export default class SceneInit {
         this.scene.add(our_system.group);
 
         this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.target = sun.mesh.position;
-        this.controls.minDistance = 0.02;
-        this.controls.maxDistance = 0.5;
+        this.controls.target = mars.mesh.position;
+        this.controls.minDistance = 0.0002;
+        this.controls.maxDistance = 0.0005;
         this.controls.update();
 
         // Создание геометрии и материала для частиц

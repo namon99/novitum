@@ -118,7 +118,7 @@ class PlanetPosition {
 class PlanetMesh extends THREE.Mesh {
     constructor(radius: number) {
         let geometry = new THREE.SphereGeometry(radius);
-        let material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         super(geometry, material);
     }
 }
