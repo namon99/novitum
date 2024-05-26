@@ -114,19 +114,26 @@ class PlanetPosition {
     }
 }
 
+function pixelTexture(texture: THREE.Texture): THREE.Texture {
+    texture.minFilter = THREE.NearestFilter;
+    texture.magFilter = THREE.NearestFilter;
+    texture.generateMipmaps = false;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+}
+
 
 class PlanetMesh extends THREE.Mesh {
-    constructor(radius: number) {
+    constructor(radius: number, texture: THREE.Texture) {
         let geometry = new THREE.SphereGeometry(radius);
-        let material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        let material = new THREE.MeshBasicMaterial({ map: texture });
         super(geometry, material);
     }
 }
 
-
 export default class Planet {
     readonly position: PlanetPosition;
-
     readonly mesh: THREE.Mesh;
     readonly group: THREE.Group;
 
@@ -142,10 +149,16 @@ export default class Planet {
         readonly inclination: mathjs.Unit,  // in deg
         readonly argument_of_periastron: mathjs.Unit,  // in deg
     ) {
+        // Загрузка текстуры
+        const textureLoader = new THREE.TextureLoader();
+        const PlanetTexture = pixelTexture(textureLoader.load('mars.jpeg'));
+
         this.position = new PlanetPosition(
             star.position, orbital_period, epoch_of_periastron, semi_major_axis, eccentricity, inclination, argument_of_periastron
-        )
-        this.mesh = new PlanetMesh(this.radius.toNumber('au'));
+        );
+
+        // Использование обработанной текстуры для создания меша планеты
+        this.mesh = new PlanetMesh(this.radius.toNumber('au'), PlanetTexture);
         this.group = new THREE.Group();
         this.group.add(this.mesh);
         this.star.group.add(this.group);

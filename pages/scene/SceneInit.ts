@@ -10,12 +10,16 @@ import {PerspectiveCamera, Scene, WebGLRenderer} from "three";
 import Star from "@/pages/lib/Star";
 import System from "@/pages/lib/System";
 import Planet from "@/pages/lib/Planet";
-
+// Импортируем EffectComposer и RenderPixelatedPass
+import { EffectComposer } from "../postprocessing/EffectComposer";
+import { RenderPixelatedPass } from "../postprocessing/RenderPixelatedPass";
 
 export default class SceneInit {
     private controls: OrbitControls;
     private labelRenderer: CSS2DRenderer;
     private renderer: WebGLRenderer;
+    private composer!: EffectComposer; // Добавляем composer
+    private pixelationPass!: RenderPixelatedPass; // Добавляем pixelationPass
     private readonly camera: PerspectiveCamera;
     private readonly scene: Scene;
     private readonly stats: Stats;
@@ -30,11 +34,11 @@ export default class SceneInit {
         container.appendChild(this.renderer.domElement);
 
         this.labelRenderer = new CSS2DRenderer();
-        this.labelRenderer.setSize( window.innerWidth, window.innerHeight );
+        this.labelRenderer.setSize(window.innerWidth, window.innerHeight);
         this.labelRenderer.domElement.style.position = 'absolute';
         this.labelRenderer.domElement.style.top = '0px';
         this.labelRenderer.domElement.style.pointerEvents = 'none';
-        container.appendChild( this.labelRenderer.domElement );
+        container.appendChild(this.labelRenderer.domElement);
 
         this.camera = new THREE.PerspectiveCamera(
             50,
@@ -59,15 +63,15 @@ export default class SceneInit {
             mathjs.unit('0.69 solarmass'), mathjs.unit('0.63 solarradius'),
             mathjs.unit('185.1807118 deg'), mathjs.unit('17.7951762 deg'),
             mathjs.unit('-108.0870000 mas/year'), mathjs.unit('89.6397000 mas/year'),
-            mathjs.unit('100.1580000 pc'),
-        )
+            mathjs.unit('100.1580000 pc')
+        );
         let planet = new Planet(
             star, '11 Com b',
             mathjs.unit('6165.6 earthmass'), mathjs.unit('12.2 earthradius'),
             mathjs.unit('323.21 days'), mathjs.unit('2454519.4 days'),
             mathjs.unit('1.178 au'), 0.238,
             mathjs.unit('90 deg'), mathjs.unit('91.33 deg')
-        )
+        );
 
         let our_system = new System('Our system');
         let sun = new Star(
@@ -76,14 +80,14 @@ export default class SceneInit {
             mathjs.unit('286.13 deg'), mathjs.unit('63.87 deg'),
             mathjs.unit('0.1 mas/year'), mathjs.unit('0.1 mas/year'),
             mathjs.unit('0.1138 pc')
-        )
+        );
         let mars = new Planet(
             sun, 'Mars',
             mathjs.unit('0.107 earthmass'), mathjs.unit('0.532 earthradius'),
             mathjs.unit('687 days'), mathjs.unit('2451545.0 days'),
             mathjs.unit('1.52367934191 au'), 0.093400620,
-            mathjs.unit('1.8497263889 deg'), mathjs.unit('336 deg'),
-        )
+            mathjs.unit('1.8497263889 deg'), mathjs.unit('336 deg')
+        );
 
         this.scene.add(system.group);
         this.scene.add(our_system.group);
@@ -111,6 +115,16 @@ export default class SceneInit {
         // Создание точек (частиц) и добавление их в сцену
         const starField = new THREE.Points(starsGeometry, starsMaterial);
         this.scene.add(starField);
+
+        // Инициализация EffectComposer и RenderPixelatedPass
+        this.composer = new EffectComposer(this.renderer);
+        this.pixelationPass = new RenderPixelatedPass(
+            new THREE.Vector2(window.innerWidth, window.innerHeight),
+            4.7, // Размер пикселей
+            this.scene,
+            this.camera
+        );
+        this.composer.addPass(this.pixelationPass);
     }
 
     animate() {
@@ -121,7 +135,8 @@ export default class SceneInit {
     }
 
     render() {
-        this.renderer.render(this.scene, this.camera);
+        // Используем composer для рендера
+        this.composer.render();
         this.labelRenderer.render(this.scene, this.camera);
     }
 
@@ -129,5 +144,6 @@ export default class SceneInit {
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.composer.setSize(window.innerWidth, window.innerHeight); // Обновляем размер composer
     }
 }
